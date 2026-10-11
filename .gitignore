@@ -7,3 +7,6 @@ desktop_pet_resources/**/frames/
 *.log
 .env
 .DS_Store
+.tools/
+artifacts/
+src-tauri/gen/

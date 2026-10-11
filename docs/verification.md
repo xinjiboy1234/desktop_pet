@@ -1,0 +1,52 @@
+# 验证记录 · 2026-10-12
+
+按用户要求，没有创建或运行单元测试。以下均为构建、静态检查和完整应用运行验证。
+
+## 已执行
+
+- `npm run check`：TypeScript strict 通过。
+- `npm run build`：Web 两个入口、ESM 组件和声明文件构建通过。最终组件约 20.24 kB / gzip 5.71 kB（构建输出为十进制 kB）。
+- `npm run desktop:build`：Rust release / Tauri 编译通过，输出 `src-tauri/target/release/duckside.exe`。
+- npm 包检查：64 个文件，约 69 MB 压缩体积，无 `frames/`。生产 Web 静态资源也无重复单帧。较大体积来自用户提供的完整 PNG 图集。
+- Node 导入组件库通过，SSR 安全，不在导入时创建 DOM。
+
+## Web / 网络运行
+
+- Chrome 实际打开开发页面、加载透明动画、切换动作。
+- 演示经过真实 HTTP / WebSocket，8 秒任务走完 thinking → working → success → idle。
+- 并发任务显示两项，优先级仲裁与重置正常。
+- 390 px 手机视口无横向溢出；桌面和手机截图已检查。
+- 最终运行诊断最多 2 页缓存，约 29,491,200 bytes，未出现页面或控制台错误。
+- 生产预览 `http://127.0.0.1:4173` 加载打包后的图集和组件正常。
+- 独立有令牌桥接：无令牌 401、未授权 origin 403、无 taskId 400；有效事件 202。
+- 重复事件识别；WS 重连快照保留原 expiresAt；租约到期清理。
+- 低优先级 error 任务立即覆盖高优先级 working 与 success 反馈。
+- 非法 Host 头不会使服务退出；请求基础 URL 不使用 Host。
+
+## Windows 原生运行
+
+- 在真实 Tauri WebView2 中加载生产包，透明背景 `rgba(0,0,0,0)`，视口 280×320。
+- 默认端口连接成功，收到本机事件后切换 celebrating。
+- 另一个实例通过 `PET_PORT=17790`、`PET_TOKEN` 连接，令牌和自定义端口实际验证通过。
+- 原生 `is_always_on_top` 返回 true；点击关闭按钮实际关闭进程。
+- 系统减少动画模拟：diagnostics reducedMotion=true、targetFps=0；恢复后正常播放。
+- 省电切换 idle targetFps=4，active targetFps=12。
+- 桌面运行未捕获 JS 异常。拖动命令已接入权限，但移动位置没有自动验证。
+
+## 性能采样与实际限制
+
+在本机 Windows + WebView2 release 进程中，以闲置动画运行 10 秒采样（打开 CDP 用于检查）：
+
+- 原硬件加速模式 GPU 子进程工作集约 821 MiB；导航到空白页后仍约 791 MiB，说明大部分为该机器运行时/驱动基础开销。
+- Windows 默认改为 `--disable-gpu` 软件绘制后，GPU 子进程约 39 MiB，透明效果与动作播放正常。
+- 最终双页缓存版本完整 7 个进程合计工作集 **414.5 MiB**，合计 private bytes **175.2 MiB**；10 秒累积 CPU 时间 **0.703 秒**，约占一个逻辑核 7.0%。进程工作集相加可能重复计入共享页，private bytes 为提交量，也不是实际物理占用。
+- 以上含 Tauri 和所有 WebView 子进程，不能把 28.1 MiB 图集预算说成应用总内存。样本含启动后短时运行、调试连接，不是跨设备稳定性能保证。更长时间与低功耗模式应按目标硬件继续测量。
+- 如果 Agent 已有浏览器/WebView，推荐直接嵌入组件，避免再启动一套系统 WebView；极低总内存预算需要进一步采用原生渲染器，当前跨 Web/桌面方案不承诺几十 MiB 的独立桌面总占用。
+
+未验证 macOS/Linux 原生窗口。当前 Tauri 配置面向 Windows；macOS 透明功能需要额外配置及平台验证。HTTPS 网站访问本地桥接受浏览器权限和 mixed-content 限制。
+
+## 审查
+
+设计/计划审查通过。实现审查发现并修复：普通快照绕过最短展示时间、错误任务被反馈遮蔽、失败事件污染去重、非法 Host URL、桌面忽略端口/令牌、同毫秒事件顺序不确定。最后一轮组件/调度器审查通过。
+
+其他运行修复：Vite 忽略 Rust 输出及本地工具目录避免 Windows EBUSY；Windows 正确加载完整 Visual Studio 编译环境；资源打包排除逐帧副本；图集加载失败退避；减少动画监听器销毁。

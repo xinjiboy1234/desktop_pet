@@ -1,0 +1,27 @@
+{
+  "name": "@xinjiboy/agent-pet",
+  "version": "0.1.0",
+  "description": "Framework-independent animated companion for Agent products",
+  "type": "module",
+  "private": false,
+  "main": "./dist-lib/agent-pet.js",
+  "types": "./dist-lib/index.d.ts",
+  "exports": {".": {"types": "./dist-lib/index.d.ts", "import": "./dist-lib/agent-pet.js"}},
+  "files": ["dist-lib", "desktop_pet_resources/video_sprites/*/sprite.json", "desktop_pet_resources/video_sprites/animations.json", "desktop_pet_resources/video_sprites/*/*.png", "README.md"],
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "bridge": "tsx bridge/server.ts",
+    "start": "node scripts/start.mjs web",
+    "desktop": "node scripts/start.mjs desktop",
+    "desktop:build": "node scripts/tauri.mjs build --no-bundle",
+    "check": "tsc --noEmit",
+    "build": "npm run check && vite build && npm run build:lib",
+    "build:lib": "vite build --config vite.lib.config.ts && tsc --project tsconfig.lib.json",
+    "prepare": "npm run build:lib",
+    "preview": "vite preview --host 127.0.0.1",
+    "tauri": "tauri"
+  },
+  "engines": {"node": ">=22"},
+  "dependencies": {"@tauri-apps/api": "^2.0.0", "tsx": "^4.0.0", "ws": "^8.18.0"},
+  "devDependencies": {"@tauri-apps/cli": "^2.0.0", "@types/node": "^24.0.0", "@types/ws": "^8.18.0", "typescript": "^5.9.0", "vite": "^7.0.0"}
+}

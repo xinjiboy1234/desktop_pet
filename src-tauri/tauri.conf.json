@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Duckside",
+  "version": "0.1.0",
+  "identifier": "com.xinjiboy.agentpet",
+  "build": {
+    "beforeDevCommand": "node scripts/dev-server.mjs",
+    "devUrl": "http://127.0.0.1:5173/desktop.html",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [{
+      "label": "main", "title": "Duckside", "url": "desktop.html",
+      "width": 280, "height": 320, "resizable": false, "decorations": false,
+      "transparent": true, "alwaysOnTop": true, "shadow": false,
+      "additionalBrowserArgs": "--disable-gpu --disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection",
+      "skipTaskbar": false, "backgroundColor": "#00000000"
+    }],
+    "security": {"csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://127.0.0.1:* http://127.0.0.1:* ipc: http://ipc.localhost"}
+  },
+  "bundle": {"active": false}
+}

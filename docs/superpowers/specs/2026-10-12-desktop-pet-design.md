@@ -15,11 +15,11 @@
 task.start / task.update / task.end / task.cancel；pet.action 表示限时或一次性表演；pet.reset 清空状态。
 短任务延迟 180ms 进入忙碌，完成后轻量反馈。活动任务默认 thinking，可 update 到 working / waiting。并发按 priority，再按更新顺序仲裁。普通状态切换最短展示 350ms，最长延迟 250ms；error/cancel 立即抢占。长操作持续循环，默认任务租约 120 秒，可 update 续租，过期清理。完成反馈约 1200ms，之后恢复剩余任务或 idle，不必等 5–8 秒原动画播完。
 idle=normal_duck；thinking=thinking_duck；working=work_duck；waiting=box_duck；success=cool_duck2；error=tired_duck；celebrating=music_duck。资源缺少专门转场，采用 120ms 淡入，保留上一帧直到下一动作首帧准备完成，不声称原资源无缝。
-限制事件去重集合、任务数量、消息长度、TTL、输入体积。断线重连指数退避，重连以快照恢复；本地任务同样会过期。
+限制事件去重集合、任务数量、消息长度、TTL、输入体积。断线重连指数退避，重连以快照恢复；快照携带原始 expiresAt，重连不得续租或复活过期任务。本地任务同样会过期。350ms 最短展示优先于 250ms 软切换目标；error/cancel 绕过最短展示。
 
 ## 性能
 Canvas 不驱动框架逐帧更新。24 FPS 活动、idle 8 FPS；降低模式 12 FPS。setTimeout 按帧调度，隐藏 / 离屏时停止绘制，逻辑时间保持真实时间。设备像素比上限 2，默认 240 CSS px。
-图集按页加载，最多 3 页解码缓存（1920²×4×3≈42.2 MiB，额外不包括 WebView/Canvas/临时解码），只预取下一页。播放器销毁释放计时器、监听器、连接和缓存。禁止加载 frames/ 冗余单帧；发布仅包含 PNG 图集、poster 和 JSON。提供缓存统计，实际 CPU/进程内存须在目标设备测量，不承诺未经测量的数值。
+图集按页加载，最终收紧为最多 2 页解码缓存（1920²×4×2≈28.1 MiB，额外不包括 WebView/Canvas/临时解码），只预取下一页。播放器销毁释放计时器、监听器、连接和缓存。禁止加载 frames/ 冗余单帧；发布仅包含 PNG 图集、poster 和 JSON。提供缓存统计，实际 CPU/进程内存须在目标设备测量，不承诺未经测量的数值。最终省电模式 idle 4 FPS / 活动 12 FPS，遵从系统减少动画设置显示静态首帧。Windows 软件绘制降低此机 GPU 常驻开销。
 
 ## 通信与安全
 HTTP POST /events 与 WebSocket /ws 使用同一事件校验，GET /health 与 /snapshot。HTTP 可用 Bearer token；WebSocket token 通过 query。默认仅允许本地开发及 Tauri origin，额外 origin 用环境变量白名单，不任意 CORS。绑定环回地址；远程访问需用户显式配置。HTTPS 站点集成可能受到浏览器 mixed-content / Local Network Access 限制，支持配置 wss 网关或直接组件 API。

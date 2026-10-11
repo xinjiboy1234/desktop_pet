@@ -1,0 +1,51 @@
+[
+  {
+    "name": "box_duck",
+    "metadata": "box_duck/sprite.json",
+    "frameCount": 124,
+    "fps": 24.0,
+    "durationSeconds": 5.166666666666667
+  },
+  {
+    "name": "cool_duck2",
+    "metadata": "cool_duck2/sprite.json",
+    "frameCount": 192,
+    "fps": 24.0,
+    "durationSeconds": 8.0
+  },
+  {
+    "name": "music_duck",
+    "metadata": "music_duck/sprite.json",
+    "frameCount": 124,
+    "fps": 24.0,
+    "durationSeconds": 5.166666666666667
+  },
+  {
+    "name": "normal_duck",
+    "metadata": "normal_duck/sprite.json",
+    "frameCount": 124,
+    "fps": 24.0,
+    "durationSeconds": 5.166666666666667
+  },
+  {
+    "name": "thinking_duck",
+    "metadata": "thinking_duck/sprite.json",
+    "frameCount": 192,
+    "fps": 24.0,
+    "durationSeconds": 8.0
+  },
+  {
+    "name": "tired_duck",
+    "metadata": "tired_duck/sprite.json",
+    "frameCount": 124,
+    "fps": 24.0,
+    "durationSeconds": 5.166666666666667
+  },
+  {
+    "name": "work_duck",
+    "metadata": "work_duck/sprite.json",
+    "frameCount": 124,
+    "fps": 24.0,
+    "durationSeconds": 5.166666666666667
+  }
+]
