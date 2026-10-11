@@ -28,4 +28,3 @@
 - [x] Inspect browser visuals and runtime errors; build/run desktop when toolchain is available.
 - [x] Review implementation against design, address defects, document actual verification results.
 - [x] Commit and push to https://github.com/xinjiboy1234/desktop_pet.git; verify remote commit.
-
