@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-lib/
+target/
+src-tauri/target/
+desktop_pet_resources/**/frames/
+*.log
+.env
+.DS_Store
