@@ -9,6 +9,7 @@ const names: Record<PetAction, string> = {
   success: "cool_duck2",
   error: "tired_duck",
   celebrating: "music_duck",
+  sleeping: "sleep_duck",
 };
 export interface PetAnimation {
   name: string;

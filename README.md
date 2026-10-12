@@ -91,7 +91,7 @@ except Exception:
 | `pet.action` | 临时表演，结束恢复任务或 idle | 必填 action，默认使用对应素材时长，可指定 ttlMs |
 | `pet.reset` | 清空任务和反馈 | 无 |
 
-`action`：idle / thinking / working / waiting / success / error / celebrating。
+`action`：idle / thinking / working / waiting / success / error / celebrating / sleeping。
 
 | 动作 | 资源 |
 |---|---|
@@ -102,6 +102,7 @@ except Exception:
 | success | cool_duck2 |
 | error | tired_duck |
 | celebrating | music_duck |
+| sleeping | sleep_duck |
 
 任务最多 128 个，priority 在 -1000～1000，ttlMs 在 1～600000，message 最多 1000 字符，事件 JSON 最多约 8 KiB（HTTP 体积硬上限 16 KiB）。超过限制返回错误。
 

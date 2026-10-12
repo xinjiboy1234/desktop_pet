@@ -28,6 +28,13 @@
     "durationSeconds": 5.166666666666667
   },
   {
+    "name": "sleep_duck",
+    "metadata": "sleep_duck/sprite.json",
+    "frameCount": 192,
+    "fps": 24.0,
+    "durationSeconds": 8.0
+  },
+  {
     "name": "thinking_duck",
     "metadata": "thinking_duck/sprite.json",
     "frameCount": 192,
