@@ -14,7 +14,7 @@
 协议 v1，事件包含 id、type、taskId、action、priority、message、ttlMs 等可选字段。
 task.start / task.update / task.end / task.cancel；pet.action 表示限时或一次性表演；pet.reset 清空状态。
 短任务延迟 180ms 进入忙碌，完成后轻量反馈。活动任务默认 thinking，可 update 到 working / waiting。并发按 priority，再按更新顺序仲裁。普通状态切换最短展示 350ms，最长延迟 250ms；error/cancel 立即抢占。长操作持续循环，默认任务租约 120 秒，可 update 续租，过期清理。完成反馈约 1200ms，之后恢复剩余任务或 idle，不必等 5–8 秒原动画播完。
-idle=normal_duck；thinking=thinking_duck；working=work_duck；waiting=box_duck；success=cool_duck2；error=tired_duck；celebrating=music_duck。资源缺少专门转场，采用 120ms 淡入，保留上一帧直到下一动作首帧准备完成，不声称原资源无缝。
+idle=normal_duck；thinking=thinking_duck；working=work_duck；waiting=box_duck；success=cool_duck2；error=tired_duck；celebrating=music_duck。资源缺少专门转场，保留上一帧直到下一动作首帧准备完成，再完整替换。透明素材交叉淡入会使不同姿势叠影和透明度下降，最终移除淡入。不声称原资源无缝。
 限制事件去重集合、任务数量、消息长度、TTL、输入体积。断线重连指数退避，重连以快照恢复；快照携带原始 expiresAt，重连不得续租或复活过期任务。本地任务同样会过期。350ms 最短展示优先于 250ms 软切换目标；error/cancel 绕过最短展示。
 
 ## 性能

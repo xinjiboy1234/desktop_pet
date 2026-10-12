@@ -72,7 +72,9 @@ export function registerAgentPet(tagName = "agent-pet"): void {
       this.scheduler.suspend();
     }
     attributeChangedCallback(name: string): void {
-      if (!this.isConnected) return;
+      // Initial attribute callbacks can run after insertion but before
+      // connectedCallback. Do not create an orphan player for those callbacks.
+      if (!this.isConnected || !this.renderer) return;
       if (name === "asset-base") {
         this.renderer?.destroy();
         this.renderer = new PetRenderer(

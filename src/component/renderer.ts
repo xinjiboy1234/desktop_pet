@@ -36,9 +36,6 @@ export class PetRenderer {
   private visible = true;
   private destroyed = false;
   private observer: IntersectionObserver;
-  private last: HTMLCanvasElement;
-  private fadeAt = 0;
-  private switched = false;
   private motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
   private staticDirty = true;
   public lowPower = false;
@@ -47,7 +44,6 @@ export class PetRenderer {
     private base: string,
     private report: (error: Error) => void,
   ) {
-    this.last = document.createElement("canvas");
     this.observer = new IntersectionObserver((entries) => {
       this.visible = entries[0]?.isIntersecting ?? true;
       this.staticDirty = true;
@@ -82,7 +78,11 @@ export class PetRenderer {
   }
   resize(size: number): void {
     const ratio = Math.min(devicePixelRatio || 1, 2);
-    this.canvas.width = this.canvas.height = Math.round(size * ratio);
+    const pixels = Math.round(size * ratio);
+    // Assigning even the same canvas dimensions clears its backing store.
+    if (this.canvas.width !== pixels || this.canvas.height !== pixels) {
+      this.canvas.width = this.canvas.height = pixels;
+    }
     this.canvas.style.width = this.canvas.style.height = `${size}px`;
     this.staticDirty = true;
     this.schedule();
@@ -121,17 +121,19 @@ export class PetRenderer {
       }
       if (generation !== this.generation || this.destroyed) return;
       const firstPath = `${name}/${meta.pages[meta.frames[0]!.page]!.image}`;
+      // The old frame is already on the canvas; pin the incoming page while
+      // decoding so another prefetch cannot close it before the handover.
+      this.visiblePage = firstPath;
       const first = await this.load(firstPath, true);
       if (!first || generation !== this.generation || this.destroyed) return;
-      this.last.width = this.canvas.width;
-      this.last.height = this.canvas.height;
-      this.last.getContext("2d")?.drawImage(this.canvas, 0, 0);
       this.meta = meta;
       this.visiblePage = firstPath;
       this.started = Date.now();
-      this.fadeAt = this.started;
-      this.switched = true;
-      this.schedule();
+      // RGBA crossfades ghost different poses and reduce opacity. Swap a
+      // complete first frame in this turn, then continue at the source rate.
+      const frame = meta.frames[0]!;
+      this.paint(first, frame);
+      this.staticDirty = false;
     } catch (error) {
       this.failed(metadataKey, error);
     } finally {
@@ -251,31 +253,7 @@ export class PetRenderer {
         this.visiblePage = path;
         this.cache.delete(path);
         this.cache.set(path, bitmap);
-        const context = this.canvas.getContext("2d");
-        if (context) {
-          context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          const alpha =
-            this.switched && !this.motionPreference.matches
-              ? Math.min(1, (Date.now() - this.fadeAt) / 120)
-              : 1;
-          if (alpha < 1) {
-            context.globalAlpha = 1 - alpha;
-            context.drawImage(this.last, 0, 0);
-          }
-          context.globalAlpha = alpha;
-          context.drawImage(
-            bitmap,
-            frame.x,
-            frame.y,
-            frame.width,
-            frame.height,
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height,
-          );
-          context.globalAlpha = 1;
-        }
+        this.paint(bitmap, frame);
       } else void this.load(path);
       if (!this.motionPreference.matches) {
         const next = meta.pages[(frame.page + 1) % meta.pages.length]!;
@@ -283,6 +261,16 @@ export class PetRenderer {
       }
     }
     this.schedule(true);
+  }
+  private paint(bitmap: ImageBitmap, frame: Metadata["frames"][number]): void {
+    const context = this.canvas.getContext("2d");
+    if (!context) return;
+    context.globalAlpha = 1;
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.drawImage(
+      bitmap, frame.x, frame.y, frame.width, frame.height,
+      0, 0, this.canvas.width, this.canvas.height,
+    );
   }
   destroy(): void {
     this.destroyed = true;
@@ -297,6 +285,5 @@ export class PetRenderer {
     this.pending.clear();
     this.metadata.clear();
     this.failures.clear();
-    this.last.width = this.last.height = 0;
   }
 }
