@@ -86,9 +86,9 @@ except Exception:
 |---|---|---|
 | `task.start` | 创建任务 | `action` 默认 thinking、`priority` 默认 0、`ttlMs` 默认 120000 |
 | `task.update` | 更新动作并续租；未知任务会创建 | 可选 action / priority / message / ttlMs |
-| `task.end` | 结束任务并播放反馈 | outcome: success / error；反馈 ttlMs 默认 1200 |
-| `task.cancel` | 移除任务并立即显示 error 反馈 | 可选 message / ttlMs |
-| `pet.action` | 临时表演，结束恢复任务或 idle | 必填 action，ttlMs 默认 1200 |
+| `task.end` | 结束任务并播放反馈 | outcome: success / error；默认使用对应素材时长，可指定 ttlMs |
+| `task.cancel` | 移除任务并立即显示 error 反馈 | 默认 error 素材时长；可选 message / ttlMs |
+| `pet.action` | 临时表演，结束恢复任务或 idle | 必填 action，默认使用对应素材时长，可指定 ttlMs |
 | `pet.reset` | 清空任务和反馈 | 无 |
 
 `action`：idle / thinking / working / waiting / success / error / celebrating。
@@ -109,7 +109,9 @@ except Exception:
 
 - 短任务等待 180ms 才进入忙碌，不会为了展示完整 5–8 秒动画拖延任务完成。
 - 长任务循环当前动作；每次 update 续租，默认超过 120 秒没续租即清理。建议每 30 秒发送一次 update。
-- 并发按优先级、最近更新时间仲裁。任务结束反馈默认 1.2 秒，然后恢复剩余任务。
+- 并发按优先级、最近更新时间仲裁。任务结束反馈默认采用对应资源时长，然后恢复剩余任务；需要短反馈时可显式指定 `ttlMs:1200`。
+- `pet.action` 和结束/取消反馈的默认时长来自 `animations.json`：thinking / success 为 8 秒，其他动作为 124÷24≈5.167 秒。显式 ttlMs 仍可覆盖。演示按钮展示素材时长，重复点击同一动作从首帧重新播放。
+- 反馈计时从事件接收开始，重连不延长到期时间；冷加载和最短展示等待可能占用部分可见播放时间。任务状态动作以任务生命周期为准，持续循环，不在一个素材周期后自动结束。
 - 普通动作至少展示 350ms。error / cancel 立即抢占；活动 error 任务优先于普通反馈和高优先级任务。
 - 新动画首帧准备好前保留旧画面，就绪后完整替换，不混合透明角色的不同姿势，避免叠影和闪烁。原素材首尾存在差异，不能保证循环天然无缝。
 - 重连收到带绝对 `expiresAt` 的快照，不续租、不复活已过期任务。桥接重启会清空内存状态，Agent 应重发当前活跃任务。

@@ -36,6 +36,7 @@ export interface PetTask {
   expiresAt: number;
 }
 export interface PetFeedback {
+  id?: string;
   action: PetAction;
   message?: string;
   expiresAt: number;
@@ -157,6 +158,7 @@ export function parseSnapshot(input: unknown): PetSnapshot {
     const f = record(v.feedback);
     if (
       !action(f.action) ||
+      (f.id !== undefined && !str(f.id, 128)) ||
       typeof f.expiresAt !== "number" ||
       !Number.isFinite(f.expiresAt) ||
       (f.message !== undefined &&

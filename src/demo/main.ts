@@ -1,4 +1,4 @@
-import { registerAgentPet, type AgentPetElement, type PetAction, type PetEvent, type PetSnapshot } from '../index';
+import { registerAgentPet, animationCatalog, type AgentPetElement, type PetAction, type PetEvent, type PetSnapshot } from '../index';
 import './style.css';
 
 registerAgentPet();
@@ -37,7 +37,13 @@ for (const [action, label] of Object.entries(labels)) {
   const button = document.createElement('button');
   button.type = 'button'; button.dataset.action = action;
   button.textContent = label; button.setAttribute('aria-pressed', String(action === 'idle'));
-  button.onclick = () => { void send({ type: 'pet.action', action: action as PetAction, ttlMs: action === 'idle' ? 500 : 2400 }); };
+  button.setAttribute('aria-label', label);
+  const duration = document.createElement('small');
+  duration.textContent = `${(animationCatalog[action as PetAction].durationMs / 1000).toFixed(2)} s`;
+  duration.setAttribute('aria-hidden', 'true');
+  button.append(duration);
+  button.title = `按素材时长播放 ${duration.textContent}`;
+  button.onclick = () => { void send({ type: 'pet.action', action: action as PetAction }); };
   $('actions').append(button);
 }
 function error(message: string) { $('error').hidden = false; $('error').textContent = message; }

@@ -7,6 +7,7 @@ import {
   type PetFeedback,
   type PetAction,
 } from "./protocol";
+import { animationCatalog } from "./animation-catalog";
 export class PetScheduler {
   private tasks = new Map<string, PetTask>();
   private seen = new Set<string>();
@@ -43,19 +44,20 @@ export class PetScheduler {
       });
     } else if (e.type === "task.end" || e.type === "task.cancel") {
       this.tasks.delete(e.taskId!);
+      const action = e.type === "task.cancel" || e.outcome === "error"
+        ? "error" : (e.action ?? "success");
       this.feedback = {
-        action:
-          e.type === "task.cancel" || e.outcome === "error"
-            ? "error"
-            : (e.action ?? "success"),
+        id: e.id,
+        action,
         message: e.message,
-        expiresAt: now + (e.ttlMs ?? 1200),
+        expiresAt: now + (e.ttlMs ?? animationCatalog[action].durationMs),
       };
     } else
       this.feedback = {
+        id: e.id,
         action: e.action!,
         message: e.message,
-        expiresAt: now + (e.ttlMs ?? 1200),
+        expiresAt: now + (e.ttlMs ?? animationCatalog[e.action!].durationMs),
       };
     this.seen.add(e.id);
     if (this.seen.size > 512)

@@ -1,13 +1,8 @@
 import type { PetAction } from "../core/protocol";
-const names: Record<PetAction, string> = {
-  idle: "normal_duck",
-  thinking: "thinking_duck",
-  working: "work_duck",
-  waiting: "box_duck",
-  success: "cool_duck2",
-  error: "tired_duck",
-  celebrating: "music_duck",
-};
+import { animationCatalog } from "../core/animation-catalog";
+const names = Object.fromEntries(Object.entries(animationCatalog).map(
+  ([action, animation]) => [action, animation.name],
+)) as Record<PetAction, string>;
 interface Metadata {
   frameCount: number;
   fps: number;
@@ -87,11 +82,11 @@ export class PetRenderer {
     this.staticDirty = true;
     this.schedule();
   }
-  async setAction(action: PetAction): Promise<void> {
+  async setAction(action: PetAction, restart = false): Promise<void> {
     if (this.destroyed) return;
     const metadataKey = `${names[action]}/sprite.json`;
     if ((this.failures.get(metadataKey)?.retryAt ?? 0) > Date.now()) return;
-    if (action === this.loadingAction || (action === this.action && this.meta))
+    if (!restart && (action === this.loadingAction || (action === this.action && this.meta)))
       return;
     const generation = ++this.generation;
     this.action = action;

@@ -27,6 +27,7 @@ export function registerAgentPet(tagName = "agent-pet"): void {
     private unsubscribe: (() => void) | undefined;
     private connection: ConnectionState = "disconnected";
     private canvas: HTMLCanvasElement;
+    private playbackId: string | undefined;
     constructor() {
       super();
       const shadow = this.attachShadow({ mode: "open" });
@@ -48,7 +49,11 @@ export function registerAgentPet(tagName = "agent-pet"): void {
       );
       this.configure();
       this.unsubscribe = this.scheduler.subscribe((snapshot) => {
-        void this.renderer?.setAction(snapshot.action);
+        const id = snapshot.feedback?.action === snapshot.action
+          ? snapshot.feedback.id : undefined;
+        const restart = !!id && id !== this.playbackId;
+        this.playbackId = id;
+        void this.renderer?.setAction(snapshot.action, restart);
         this.emit("pet-state", snapshot);
       });
       this.transport = new PetTransport(
@@ -69,6 +74,7 @@ export function registerAgentPet(tagName = "agent-pet"): void {
       this.unsubscribe = undefined;
       this.renderer?.destroy();
       this.renderer = undefined;
+      this.playbackId = undefined;
       this.scheduler.suspend();
     }
     attributeChangedCallback(name: string): void {
