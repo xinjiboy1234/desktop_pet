@@ -7,6 +7,7 @@ const labels: Record<PetAction, string> = {
   success: '任务完成', error: '需要休息', celebrating: '开心庆祝',
   sleeping: '安心睡觉',
   speaking: '开口说话', box_speaking: '箱中说话',
+  angry: '气鼓鼓',
 };
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <header class="topbar"><a class="brand" href="./"><span class="brandmark">d.</span> duckside<span class="brandtag">AGENT COMPANION</span></a><a class="source" href="https://github.com/xinjiboy1234/desktop_pet" target="_blank" rel="noreferrer">GitHub ↗</a></header>

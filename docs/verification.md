@@ -66,3 +66,9 @@
 移除按钮统一 2400ms 和调度反馈统一 1200ms，使用资源清单 frameCount/fps：124/24 向上取整 5167ms，192/24 为 8000ms。任务状态持续循环至任务结束；显式 ttlMs 保留。增加可选反馈 id，以使新同动作事件重播而重复快照不重播；旧快照无 id 仍可解析。
 
 真实 Chrome + 新桥接端口运行：working 从按钮触发到返回 idle 为 5192ms，thinking 为 8028ms；显式 900ms 覆盖有效；同动作再次点击从首帧开始；活跃 working 任务超过 5.5 秒仍循环；task.end 默认 success 的快照剩余 7999ms。页面无 JS 异常。类型检查、组件/生产 Web 和 Windows release 构建通过；源代码审查通过。事件到期时间始于接收，冷加载或状态最短展示会减少可见播放时间，该限制保留且记录在 README。没有创建或运行单元测试。
+
+## 2026-10-14 Angry 与接入 Skill
+
+新增 angry 动作与 angry_duck 图集映射。npm run build 通过；运行时检查确认 angry 默认 TTL 为 5167ms，到期恢复 idle，构建目录包含 sprite.json 与全部 PNG 页。
+
+新增 skills/duckside-integration，包含入口、11 动作介绍、接入与排错参考、Python 标准库事件发送工具。quick_validate.py（Python UTF-8 模式）通过。独立 bridge 端口 18793 实际 HTTP 验证：11 个动作、task.start/update/end、取消 error 反馈、重复事件去重、令牌认证、非法输入处理均通过；测试桥接已停止。项目生产 Web 和组件库构建通过。本次未执行原生桌面构建或桌面视觉复验。

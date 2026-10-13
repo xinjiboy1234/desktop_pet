@@ -9,6 +9,7 @@ export const actions = [
   "sleeping",
   "speaking",
   "box_speaking",
+  "angry",
 ] as const;
 export type PetAction = (typeof actions)[number];
 export type PetEventType =

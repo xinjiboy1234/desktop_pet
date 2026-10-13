@@ -1,5 +1,12 @@
 [
   {
+    "name": "angry_duck",
+    "metadata": "angry_duck/sprite.json",
+    "frameCount": 124,
+    "fps": 24.0,
+    "durationSeconds": 5.166666666666667
+  },
+  {
     "name": "box_speak",
     "metadata": "box_speak/sprite.json",
     "frameCount": 158,

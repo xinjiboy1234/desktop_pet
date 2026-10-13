@@ -1,6 +1,6 @@
 # Duckside · Agent 桌面宠物
 
-一个可嵌入 Agent 产品的透明鸭子组件。Web 和 Tauri 桌面共用 TypeScript 调度器与 Canvas 播放器，通过本机 HTTP / WebSocket 切换动作。复用 `desktop_pet_resources/` 中的 7 组动画，参考原项目的图集坐标协议。
+一个可嵌入 Agent 产品的透明鸭子组件。Web 和 Tauri 桌面共用 TypeScript 调度器与 Canvas 播放器，通过本机 HTTP / WebSocket 切换动作。复用 `desktop_pet_resources/` 中的 11 组动画，参考原项目的图集坐标协议。
 
 ## 快速运行
 
@@ -91,7 +91,7 @@ except Exception:
 | `pet.action` | 临时表演，结束恢复任务或 idle | 必填 action，默认使用对应素材时长，可指定 ttlMs |
 | `pet.reset` | 清空任务和反馈 | 无 |
 
-`action`：idle / thinking / working / waiting / success / error / celebrating / sleeping / speaking / box_speaking。
+`action`：idle / thinking / working / waiting / success / error / celebrating / sleeping / speaking / box_speaking / angry。
 
 | 动作 | 资源 |
 |---|---|
@@ -105,6 +105,9 @@ except Exception:
 | sleeping | sleep_duck |
 | speaking | normal_speak |
 | box_speaking | box_speak |
+| angry | angry_duck |
+
+生气动作可通过 `pet.dispatch({ version: 1, id: crypto.randomUUID(), type: 'pet.action', action: 'angry' })` 触发，默认持续约 5.17 秒，然后恢复当前任务或待机。
 
 任务最多 128 个，priority 在 -1000～1000，ttlMs 在 1～600000，message 最多 1000 字符，事件 JSON 最多约 8 KiB（HTTP 体积硬上限 16 KiB）。超过限制返回错误。
 
@@ -113,7 +116,7 @@ except Exception:
 - 短任务等待 180ms 才进入忙碌，不会为了展示完整 5–8 秒动画拖延任务完成。
 - 长任务循环当前动作；每次 update 续租，默认超过 120 秒没续租即清理。建议每 30 秒发送一次 update。
 - 并发按优先级、最近更新时间仲裁。任务结束反馈默认采用对应资源时长，然后恢复剩余任务；需要短反馈时可显式指定 `ttlMs:1200`。
-- `pet.action` 和结束/取消反馈的默认时长来自 `animations.json`：thinking / success 为 8 秒，其他动作为 124÷24≈5.167 秒。显式 ttlMs 仍可覆盖。演示按钮展示素材时长，重复点击同一动作从首帧重新播放。
+- `pet.action` 和结束/取消反馈的默认时长来自 `animations.json`：thinking / success 为 8 秒，sleeping / speaking / box_speaking 为 158÷24≈6.584 秒，其余为 124÷24≈5.167 秒。显式 ttlMs 仍可覆盖。演示按钮展示素材时长，重复点击同一动作从首帧重新播放。
 - 反馈计时从事件接收开始，重连不延长到期时间；冷加载和最短展示等待可能占用部分可见播放时间。任务状态动作以任务生命周期为准，持续循环，不在一个素材周期后自动结束。
 - 普通动作至少展示 350ms。error / cancel 立即抢占；活动 error 任务优先于普通反馈和高优先级任务。
 - 新动画首帧准备好前保留旧画面，就绪后完整替换，不混合透明角色的不同姿势，避免叠影和闪烁。原素材首尾存在差异，不能保证循环天然无缝。
@@ -193,6 +196,23 @@ HTTP 使用 `Authorization: Bearer ...`，组件 `pet.connect(url, token)` 自�
 `PET_HOST` 可更改绑定地址；离开环回地址时必须设置 PET_TOKEN。跨设备需要防火墙配置，默认不开放局域网。
 
 HTTPS 网站连接本机 `ws://` / `http://` 受浏览器 mixed-content、Local Network Access 权限和企业策略影响。不能保证任意托管站点都可直连；使用允许的本地页面、配置可信 `wss://` 网关，或直接组件 API。见 [MDN WebSocket 指南](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications) 和 [Local Network Access](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Local_network_access)。
+
+## Codex 接入 Skill
+
+仓库提供 [duckside-integration](skills/duckside-integration/SKILL.md)，包含接入流程、[全部表情与使用技巧](skills/duckside-integration/references/expressions.md)、[Web/桌面/HTTP 接入及排错](skills/duckside-integration/references/integration.md)，以及只依赖 Python 标准库的事件发送工具。
+
+将 `skills/duckside-integration` 整个文件夹复制到 `$CODEX_HOME/skills/`（未设置时使用 `~/.codex/skills/`）。在新会话中可输入：`使用 $duckside-integration 把我的 Agent 接入 Duckside，并在执行任务时显示对应表情`。Skill 本身不包含运行时和图集，仍需运行本项目或将组件嵌入产品。
+
+从项目根目录试用发送工具：
+
+```powershell
+python skills/duckside-integration/scripts/pet_event.py health
+python skills/duckside-integration/scripts/pet_event.py pet.action --action angry
+python skills/duckside-integration/scripts/pet_event.py task.start --task-id demo --action thinking
+python skills/duckside-integration/scripts/pet_event.py task.end --task-id demo --outcome success
+```
+
+令牌通过 `PET_TOKEN` 环境变量读取；`--dry-run` 只输出事件，`--id` 可用于同一事件的重试。先启动桥接，并连接网页或桌面窗口后即可看到表情。
 
 ## 开发与验证
 

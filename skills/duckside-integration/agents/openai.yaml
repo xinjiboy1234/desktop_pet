@@ -1,0 +1,4 @@
+interface:
+  display_name: "Duckside 桌宠接入"
+  short_description: "将 Duckside 鸭子桌宠接入 Agent，驱动任务状态、11 种表情与本地桥接"
+  default_prompt: "使用 $duckside-integration 将这个 Agent 接入 Duckside 桌宠，并配置合适的任务状态和表情动作。"
