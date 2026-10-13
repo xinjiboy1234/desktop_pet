@@ -13,7 +13,7 @@ async function connect() {
     pet.connect(url.searchParams.get('endpoint') || endpoint, url.searchParams.get('token') || token || undefined);
   } catch { status.textContent = '无法读取桥接配置'; }
 }
-const labels = { idle: '等待 Agent', thinking: '思考中…', working: '工作中…', waiting: '等待结果…', success: '完成了！', error: '需要你的帮助', celebrating: '好耶！', sleeping: '睡觉中…' };
+const labels = { idle: '等待 Agent', thinking: '思考中…', working: '工作中…', waiting: '等待结果…', success: '完成了！', error: '需要你的帮助', celebrating: '好耶！', sleeping: '睡觉中…', speaking: '说话中…', box_speaking: '箱中说话…' };
 pet.addEventListener('pet-state', (e) => { const s = (e as CustomEvent<PetSnapshot>).detail; status.textContent = s.feedback?.message || labels[s.action]; });
 pet.addEventListener('pet-connection', (e) => { const s = (e as CustomEvent).detail; if ((typeof s === 'string' ? s : s.state) !== 'connected') status.textContent = '等待本地桥接…'; });
 pet.addEventListener('pet-error', (e) => { status.textContent = (e as CustomEvent).detail?.message || '连接或资源不可用'; });

@@ -1,5 +1,19 @@
 [
   {
+    "name": "box_speak",
+    "metadata": "box_speak/sprite.json",
+    "frameCount": 158,
+    "fps": 24.0,
+    "durationSeconds": 6.583333333333333
+  },
+  {
+    "name": "normal_speak",
+    "metadata": "normal_speak/sprite.json",
+    "frameCount": 158,
+    "fps": 24.0,
+    "durationSeconds": 6.583333333333333
+  },
+  {
     "name": "box_duck",
     "metadata": "box_duck/sprite.json",
     "frameCount": 124,
@@ -30,9 +44,9 @@
   {
     "name": "sleep_duck",
     "metadata": "sleep_duck/sprite.json",
-    "frameCount": 192,
+    "frameCount": 158,
     "fps": 24.0,
-    "durationSeconds": 8.0
+    "durationSeconds": 6.583333333333333
   },
   {
     "name": "thinking_duck",
